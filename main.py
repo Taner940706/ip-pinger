@@ -1,14 +1,31 @@
-from tkinter import filedialog, ttk
+from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import *
+from PIL import ImageTk, Image
 import os
 
 
 # functions
 def about():
-    about_win = Tk()
+    about_win = Toplevel()
     about_win.title("About")
     about_win.geometry("700x500")
+    frame = Frame(about_win, width=200, height=200)
+    frame.pack()
+    frame.place(anchor='center', relx=0.5, rely=0.5)
+
+    # Create an object of tkinter ImageTk
+    img = ImageTk.PhotoImage(Image.open("./images/about_transperant.png"))
+
+    # Create a Label Widget to display the text or Image
+    label = Label(frame, image=img)
+    label.pack()
+    about_project_label = Label(frame, text="IP Pinger is a software for pinging multiple ip addresses from file. \nThe imported file should be in .txt format. In the log tab users can see ping status also see result in the result frame. \nFor analysis, users can export the file (D:/readme.txt).")
+    about_project_label.pack(pady=20)
+    about_me_label = Label(frame, text="Created by Taner Ismail")
+    about_me_label.pack(pady=20)
+    Button(frame, text='OK', command=about_win.destroy).pack()
+
     about_win.mainloop()
 
 
@@ -37,6 +54,7 @@ def open_file():
     upload_label.config(text=text_file.name)
     uploaded_text.insert(END, rows)
     text_file.close()
+    statusbar.config(text="Waiting...")
 
 
 def clear_uploaded_file():
@@ -48,9 +66,9 @@ def clear_result_file():
 
 
 def test_ips():
-    pb.start()
     line_list = uploaded_text.get('1.0', 'end').split('\n')
     for line in line_list:
+
         res = os.popen(f"ping -n 1 {line}").read()
         if "Request timed out." in res:
             result_text.insert(END, line + ' status: No' + '\n')
@@ -58,8 +76,8 @@ def test_ips():
             result_text.insert(END, line + ' status: Yes' + '\n')
         logs[f'{line}'] = res
 
-    pb.stop()
     result_text.delete("end-2l", "end-1l")
+    statusbar.config(text="Done!")
     messagebox.showinfo('Test updated IP addresses', 'IP addresses are tested! ')
 
 
@@ -69,6 +87,7 @@ def export_file():
         for line in line_list:
             f.write(line + "\n")
     messagebox.showinfo('Export file', 'File is exported in directory D:/readme.txt')
+    statusbar.config(text="Ready")
 
 
 # root
@@ -78,9 +97,9 @@ root.geometry("700x500")
 root.iconbitmap('./images/icon.ico')
 logs = {}
 
-# progress bar
-pb = ttk.Progressbar(root, orient='horizontal', mode='indeterminate', length=280)
-pb.pack(side="bottom")
+statusbar = Label(root, text="Ready", bd=1, relief=SUNKEN, anchor=W)
+
+statusbar.pack(side=BOTTOM, fill=X)
 
 # menu
 my_menu = Menu(root)
