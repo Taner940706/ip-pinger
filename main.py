@@ -10,6 +10,7 @@ def about():
     about_win = Toplevel()
     about_win.title("About")
     about_win.geometry("700x500")
+    about_win.iconbitmap('./images/icon.ico')
     frame = Frame(about_win, width=200, height=200)
     frame.pack()
     frame.place(anchor='center', relx=0.5, rely=0.5)
@@ -20,19 +21,35 @@ def about():
     # Create a Label Widget to display the text or Image
     label = Label(frame, image=img)
     label.pack()
-    about_project_label = Label(frame, text="IP Pinger is a software for pinging multiple ip addresses from file. \nThe imported file should be in .txt format. In the log tab users can see ping status also see result in the result frame. \nFor analysis, users can export the file (D:/readme.txt).")
+    about_project_label = Label(frame, text="Software name: IP Pinger \n Version: 1.0 \n Purpose: IP Pinger is a software for pinging multiple ip addresses from file. \nThe imported file should be in .txt format. In the log tab users can see ping status also see result in the result frame. \nFor analysis, users can export the file (D:/readme.txt).")
     about_project_label.pack(pady=20)
     about_me_label = Label(frame, text="Created by Taner Ismail")
     about_me_label.pack(pady=20)
-    Button(frame, text='OK', command=about_win.destroy).pack()
+    Button(frame, text='Close', command=about_win.destroy).pack()
 
     about_win.mainloop()
 
 
 def helper():
-    help_win = Tk()
+    help_win = Toplevel()
     help_win.title("Help")
     help_win.geometry("700x500")
+    help_win.iconbitmap('./images/icon.ico')
+    frame = Frame(help_win, width=200, height=200)
+    frame.pack()
+
+    # Create an object of tkinter ImageTk
+    img = ImageTk.PhotoImage(Image.open("./images/about_transperant.png"))
+
+    # Create a Label Widget to display the text or Image
+    label = Label(frame, image=img)
+    label.pack()
+    scrollbar = Scrollbar(frame, orient="vertical")
+    scrollbar.pack(side="right", fill="y")
+    help_text = Label(frame, width=50, text="Component:\n Main Menu:\n Upload button - open filedialog for upload selected file;\n Upload label: show directory of uploaded file;\n Uploaded text field - show uploaded IP addresses;\n Test IPs button - button for pinging IPs;\n Clear Uploaded IPs button - delete content of uploaded text field \n Result text field - show result of pinging IPs \n Export button - export content of result text field \n Clear result text field - delete content of result text field \n Logs:\n Logs text field - show ping result for each IP address in format 'ping -n 1 {IP}' \n About: \n Information about software and useful links.\n Help:\n Information about components and usage.")
+    help_text.pack(pady=20)
+    scrollbar.config(command=help_text.yview)
+    Button(frame, text='Close', command=help_win.destroy).pack()
     help_win.mainloop()
 
 
@@ -40,6 +57,7 @@ def show_logs():
     log_win = Tk()
     log_win.title("Logs")
     log_win.geometry("700x500")
+    log_win.iconbitmap('./images/icon.ico')
     log_txt = Text(log_win, width=50)
     for key in logs.keys():
         log_txt.insert(INSERT, logs[key])
@@ -66,15 +84,19 @@ def clear_result_file():
 
 
 def test_ips():
+    logs.clear()
     line_list = uploaded_text.get('1.0', 'end').split('\n')
     for line in line_list:
-
         res = os.popen(f"ping -n 1 {line}").read()
-        if "Request timed out." in res:
-            result_text.insert(END, line + ' status: No' + '\n')
+        test_if_ip_valid = line.split(".")
+        if not (len(test_if_ip_valid) == 4 and all(0 <= int(part) < 256 for part in test_if_ip_valid)):
+            result_text.insert(END, line + ' is not a correct IP' + '\n')
         else:
-            result_text.insert(END, line + ' status: Yes' + '\n')
-        logs[f'{line}'] = res
+            if "Request timed out." in res:
+                result_text.insert(END, line + ' status: No' + '\n')
+            else:
+                result_text.insert(END, line + ' status: Yes' + '\n')
+            logs[f'{line}'] = res
 
     result_text.delete("end-2l", "end-1l")
     statusbar.config(text="Done!")
@@ -115,7 +137,7 @@ my_menu.add_cascade(label='Logs', menu=log_menu)
 log_menu.add_command(label='Show logs', command=show_logs)
 
 # upload ip from file
-upload_frame = LabelFrame(root, text="Upload .csv file", padx=30, pady=20)
+upload_frame = LabelFrame(root, text="Upload .txt file", padx=30, pady=20)
 upload_frame.pack(padx=10, pady=10)
 upload_button = Button(upload_frame, text="Upload...", command=open_file)
 upload_label = Label(upload_frame, text="           Path...")
