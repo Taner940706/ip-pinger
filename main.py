@@ -85,11 +85,14 @@ def open_file():
     upload_label.config(text=text_file.name)
     uploaded_text.insert(END, rows)
     text_file.close()
+    line = uploaded_text.get('1.0', 'end').split('\n')
+    ip_count.config(text=f'Number of IP for testing: {len(line)-1}')
     statusbar.config(text="Waiting...")
 
 
 def clear_uploaded_file():
     uploaded_text.delete("1.0", "end")
+    ip_count.config(text=f'Number of IP for testing: 0')
 
 
 def clear_result_file():
@@ -134,7 +137,8 @@ root.resizable(False, False)
 logs = {}
 
 statusbar = Label(root, text="Ready", bd=1, relief=SUNKEN, anchor=W)
-
+ip_count = Label(root, text="Number of IP for testing: 0", bd=1, relief=SUNKEN, anchor=W)
+ip_count.pack(side=BOTTOM, fill=X)
 statusbar.pack(side=BOTTOM, fill=X)
 
 # menu
